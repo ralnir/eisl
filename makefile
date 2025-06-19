@@ -8,7 +8,11 @@ ifneq  ($(shell uname),Darwin)
 	ifeq  ($(shell uname),OpenBSD)
 		LIBS := -lm
 	else
-		LIBS := -lm -ldl
+		ifeq  ($(shell uname),SunOS)
+			LIBS := -lxnet -lm
+		else
+			LIBS := -lm -ldl
+		endif
 	endif
 endif
 LIBSRASPI := -lm -ldl -lwiringPi
@@ -33,8 +37,13 @@ else
 			ifeq  ($(shell uname),FreeBSD)
 				CURSES_LIBS := -lncurses
 			else
-				CURSES_CFLAGS := $(shell ncursesw6-config --cflags)
-				CURSES_LIBS := $(shell ncursesw6-config --libs)
+				ifeq  ($(shell uname),SunOS)
+					CURSES_CFLAGS := $(shell gncursesw5-config --cflags)
+					CURSES_LIBS := $(shell gncursesw5-config --libs)
+				else
+					CURSES_CFLAGS := $(shell ncursesw6-config --cflags)
+					CURSES_LIBS := $(shell ncursesw6-config --libs)
+				endif
 			endif
 		endif
 	endif
@@ -68,7 +77,10 @@ ifeq ($(DEBUG),1)
 		LDFLAGS += -fsanitize=undefined
 	endif
 else
-	CFLAGS += -O3 -flto -DNDEBUG=1 -DWITHOUT_NANA=1
+	ifneq  ($(shell uname),SunOS)
+		CFLAGS += -flto
+	endif
+	CFLAGS += -O3 -DNDEBUG=1 -DWITHOUT_NANA=1
 	SRC_CII += cii/src/mem.c
 endif
 OBJ_CII := $(SRC_CII:.c=.o)
@@ -93,14 +105,23 @@ ifneq ($(DEBUG),1)
 		LDFLAGS += -s
 	endif
 endif
-PREFIX := /usr/local
+
+ifeq  ($(shell uname),SunOS)
+	PREFIX := /usr
+else
+	PREFIX := /usr/local
+endif
 SHAREDIR ?= $(PREFIX)/share/eisl
 CFLAGS += -DSHAREDIR=$(SHAREDIR)
 bindir := $(PREFIX)/bin
 sharedir := $(PREFIX)/share/eisl/library
 DESTDIR :=
 INSTALL := install
-INSTALL_PROGRAM := $(INSTALL) -m755
+ifeq   ($(shell uname),SunOS)
+	INSTALL_PROGRAM := $(INSTALL)
+else
+	INSTALL_PROGRAM := $(INSTALL) -m755
+endif
 MKDIR_PROGRAM := mkdir -p -m 755
 
 # Use files from source tree at compile time because
@@ -186,6 +207,15 @@ install: eisl edlis $(OBJ_LISP)
 	$(MKDIR_PROGRAM) $(DESTDIR)$(sharedir)
 	$(INSTALL_PROGRAM) library/* $(DESTDIR)$(sharedir)
 	$(INSTALL_PROGRAM) fast.h ffi.h $(DESTDIR)/$(PREFIX)/share/eisl
+
+.PHONY: install-solaris
+install-solaris: eisl edlis $(OBJ_LISP)
+	$(MKDIR_PROGRAM) $(DESTDIR)$(bindir)
+	$(INSTALL_PROGRAM) -f $(DESTDIR)$(bindir)$(EISL) eisl
+	$(INSTALL_PROGRAM) -f $(DESTDIR)$(bindir)$(EDLIS) edlis
+	$(MKDIR_PROGRAM) $(DESTDIR)$(sharedir)
+	$(INSTALL_PROGRAM) -f $(DESTDIR)$(sharedir) library/*
+	$(INSTALL_PROGRAM) -f $(DESTDIR)/$(PREFIX)/share/eisl fast.h ffi.h
 
 .PHONY: uninstall
 uninstall:

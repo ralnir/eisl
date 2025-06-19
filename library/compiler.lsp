@@ -251,6 +251,7 @@ defgeneric compile
                (option
                (cond ((member (self-introduction) '(linux openbsd))
                       "cc -O3 -w -shared -fPIC -s -o ")
+					 ((eq (self-introduction) 'sunos) "gcc -O3 -w -shared -fPIC -s -o ")
                      ((eq (self-introduction) 'freebsd) "cc -O3 -w -shared -fPIC -s -o ")
                      ((eq (self-introduction) 'macos) "cc -O3 -w -shared -fPIC -Wl,-S,-x -o ")))
                (fname (filename x))
@@ -317,6 +318,7 @@ defgeneric compile
                (option
                (cond ((member (self-introduction) '(linux openbsd))
                       "cc -O3 -w -shared -fPIC -s -o ")
+					 ((eq (self-introduction) 'sunos) "gcc -O3 -w -shared -fPIC -s -o ")
                      ((eq (self-introduction) 'freebsd) "cc -O3 -w -shared -fPIC -s -o ")
                      ((eq (self-introduction) 'macos) "cc -O3 -w -shared -fPIC -Wl,-S,-x -o ")))
                (fname (filename x))

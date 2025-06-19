@@ -4,6 +4,7 @@
          #include <tcl.h>
          #endif")
 (c-option "-ltcl -ltk" linux)
+(c-option "-ltcl8.6 -ltk8.6" sunos)
 (c-option "-I/opt/homebrew/opt/tcl-tk/include -L/opt/homebrew/opt/tcl-tk/lib -ltk8.6 -ltkstub8.6 -ltcl8.6 -ltclstub8.6" macos)
 (c-define "BUFFSIZE" "1024")
 (c-lang "Tcl_Interp *interp;

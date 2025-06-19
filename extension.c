@@ -169,6 +169,8 @@ int f_self_introduction(int arglist __unused, int th __unused)
     return (make_sym("OPENBSD"));
 #elif defined(__FreeBSD__)
     return (make_sym("FREEBSD"));
+#elif defined(__sun)
+	return (make_sym("SUNOS"));
 #elif defined(__linux__)
     return (make_sym("LINUX"));
 #else

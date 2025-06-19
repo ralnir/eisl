@@ -7,7 +7,8 @@
 ;;; NB: this should be used under "eisl -r", otherwise keyboard echo may end up disabled!
 
 (c-define "NCURSES_OPAQUE" "1")
-(c-include "<curses.h>")
+(c-include "<curses.h>" '(freebsd linux macos openbsd))
+(c-include "<ncurses/curses.h>" sunos)
 (c-include "<locale.h>")
 (c-include "<unistd.h>")
 (c-option "-lncurses")
